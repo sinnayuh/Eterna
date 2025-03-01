@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.awt.*;
 import java.time.Instant;
 
-public class PingCommand {
+public final class PingCommand {
     @Command(
             name = "ping",
             description = "Check the bot's latency"

@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import java.time.Instant;
 
-public class ClearCommand {
+public final class ClearCommand {
 
     @Command(
             name = "clearcommands",

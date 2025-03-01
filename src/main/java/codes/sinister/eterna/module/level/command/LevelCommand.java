@@ -2,14 +2,13 @@ package codes.sinister.eterna.module.level.command;
 
 import codes.sinister.eterna.module.level.LevelRegistry;
 import codes.sinister.eterna.module.level.UserLevelData;
+import codes.sinister.eterna.util.Constant;
 import gg.flyte.neptune.annotation.Command;
 import gg.flyte.neptune.annotation.Option;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static codes.sinister.eterna.util.Constant.embed;
 
 public final class LevelCommand {
 
@@ -37,7 +36,7 @@ public final class LevelCommand {
         String progressBar = createProgressBar(currentXp, requiredXp, BAR_LENGTH);
         double percentage = (double) currentXp / requiredXp * 100;
 
-        event.replyEmbeds(embed()
+        event.replyEmbeds(Constant.embed()
                 .setTitle(user.getName() + "'s Level")
                 .setThumbnail(user.getEffectiveAvatarUrl())
                 .addField("Level", String.valueOf(levelData.getLevel()), true)

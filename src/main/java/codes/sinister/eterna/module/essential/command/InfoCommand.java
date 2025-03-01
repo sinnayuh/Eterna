@@ -10,22 +10,22 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.awt.*;
 import java.time.Instant;
 
-public class InfoCommand {
+public final class InfoCommand {
     @Command(
-            name = "info",
-            description = "Get information about a user"
+            name = "id",
+            description = "View information about yourself or another member"
     )
-    public void onInfo(SlashCommandInteractionEvent event,
-                       @Option(description = "The user to get info about", required = false) User user) {
+    public void onInfo(SlashCommandInteractionEvent event, @Option(description = "The user to get info about", required = false) User user) {
 
         User targetUser = user != null ? user : event.getUser();
         Member member = event.getGuild().getMember(targetUser);
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("User Information")
-                .setColor(member != null ? member.getColor() : Color.BLUE)
+                .setColor(Color.decode("#fc9a9a"))
                 .setThumbnail(targetUser.getEffectiveAvatarUrl())
                 .addField("Username", targetUser.getName(), true)
+                .addField("Nickname", member.getNickname() == null ? "No nickname" : member.getNickname(), true)
                 .addField("ID", targetUser.getId(), true)
                 .addField("Account Created", "<t:" + targetUser.getTimeCreated().toEpochSecond() + ":R>", true);
 

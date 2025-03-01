@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Listener for shard-related events
  */
-public class ShardListener extends ListenerAdapter {
+public final class ShardListener extends ListenerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShardListener.class);
     
     private final Bot bot;
