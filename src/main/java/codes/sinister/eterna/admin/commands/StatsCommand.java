@@ -41,7 +41,7 @@ public class StatsCommand {
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("Bot Statistics")
-                .setColor(Color.BLUE)
+                .setColor(Color.decode("#fc9a9a"))
                 .addField("Servers", String.valueOf(serverCount), true)
                 .addField("Users", String.valueOf(userCount), true)
                 .addField("Total Shards", String.valueOf(shardCount), true)

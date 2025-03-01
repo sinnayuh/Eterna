@@ -20,7 +20,7 @@ public class PingCommand {
 
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("🏓 Pong!")
-                    .setColor(Color.GREEN)
+                    .setColor(Color.decode("#fc9a9a"))
                     .addField("Gateway Ping", gatewayPing + "ms", true)
                     .addField("REST Ping", ping + "ms", true)
                     .setFooter("Requested by " + event.getUser().getAsTag())
