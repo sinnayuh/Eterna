@@ -23,7 +23,7 @@ public final class PingCommand {
                     .setColor(Color.decode("#fc9a9a"))
                     .addField("Gateway Ping", gatewayPing + "ms", true)
                     .addField("REST Ping", ping + "ms", true)
-                    .setFooter("Requested by " + event.getUser().getAsTag())
+                    .setFooter("Requested by " + event.getUser().getAsMention())
                     .setTimestamp(Instant.now());
 
             hook.sendMessageEmbeds(embed.build()).queue();
