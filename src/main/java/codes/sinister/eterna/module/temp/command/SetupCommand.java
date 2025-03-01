@@ -18,8 +18,8 @@ public class SetupCommand {
     )
     public void onSetup(
             SlashCommandInteractionEvent event,
-            @Option(description = "The 'Join to Create' voice channel") VoiceChannel joinChannel,
-            @Option(description = "The category for temporary channels") Category category
+            @Option(description = "The 'Join to Create' voice channel") String joinChannelId,
+            @Option(description = "The category for temporary channels") String categoryId
     ) {
         Guild guild = event.getGuild();
         if (guild == null) {
@@ -27,8 +27,21 @@ public class SetupCommand {
             return;
         }
 
+        VoiceChannel joinChannel = guild.getVoiceChannelById(joinChannelId);
+        Category category = guild.getCategoryById(categoryId);
+
+        if (joinChannel == null) {
+            event.reply("Invalid voice channel provided. Please select a valid voice channel.").setEphemeral(true).queue();
+            return;
+        }
+
+        if (category == null) {
+            event.reply("Invalid category provided. Please select a valid category.").setEphemeral(true).queue();
+            return;
+        }
+
         TempChannelConfig config = TempChannelConfig.forGuild(guild.getId());
-        config.setConfig(joinChannel.getId(), category.getId());
+        config.setConfig(joinChannelId, categoryId);
 
         event.replyEmbeds(Constant.embed()
                 .setTitle("✅ Temporary Channels Setup")

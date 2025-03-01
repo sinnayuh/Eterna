@@ -25,10 +25,8 @@ public class TemporaryVoiceEvent extends ListenerAdapter {
         var guildId = guild.getId();
 
         if (joinedChannel != null) {
-            // Get configuration for this guild
             TempChannelConfig config = TempChannelConfig.forGuild(guildId);
 
-            // If config doesn't exist or channel doesn't match, ignore
             if (!config.isConfigured() || !joinedChannel.getId().equals(config.getJoinChannelId())) {
                 return;
             }
@@ -69,18 +67,15 @@ public class TemporaryVoiceEvent extends ListenerAdapter {
         String guildId = event.getGuild().getId();
         String channelId = leftChannel.getId();
 
-        // Get configuration for this guild
         TempChannelConfig config = TempChannelConfig.forGuild(guildId);
         if (!config.isConfigured()) {
             return;
         }
 
-        // If this is the "join to create" channel, ignore it
         if (channelId.equals(config.getJoinChannelId())) {
             return;
         }
 
-        // If channel is empty and in the correct category
         if (leftChannel.getMembers().isEmpty() && leftChannel.getParentCategoryId() != null
                 && leftChannel.getParentCategoryId().equals(config.getCategoryId())) {
 
@@ -90,13 +85,19 @@ public class TemporaryVoiceEvent extends ListenerAdapter {
                     refreshedChannel.delete().queue();
                     scheduledTasks.remove(channelId);
 
-                    // Remove user-channel mapping
                     Map<String, String> guildUsers = userChannelMap.get(guildId);
                     if (guildUsers != null) {
-                        guildUsers.values().removeIf(value -> value.equals(channelId));
+                        guildUsers.entrySet().stream()
+                                .filter(entry -> channelId.equals(entry.getValue()))
+                                .findFirst()
+                                .ifPresent(entry -> guildUsers.remove(entry.getKey()));
+
+                        if (guildUsers.isEmpty()) {
+                            userChannelMap.remove(guildId);
+                        }
                     }
                 }
-            }, 3, TimeUnit.MINUTES);
+            }, 10, TimeUnit.SECONDS);
 
             scheduledTasks.put(channelId, future);
         } else {
