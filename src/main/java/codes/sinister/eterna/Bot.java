@@ -1,5 +1,7 @@
 package codes.sinister.eterna;
 
+import codes.sinister.eterna.module.level.LevelRegistry;
+import codes.sinister.eterna.module.temp.TempChannelConfig;
 import codes.sinister.eterna.util.config.Config;
 import codes.sinister.eterna.util.database.Mongo;
 import gg.flyte.neptune.Neptune;
@@ -143,5 +145,7 @@ public final class Bot {
         if (shardManager != null) {
             shardManager.shutdown();
         }
+        TempChannelConfig.clearAllCache();
+        LevelRegistry.clearAllCache();
     }
 }
