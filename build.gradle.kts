@@ -16,9 +16,7 @@ repositories {
 
 dependencies {
     implementation("org.mongodb:mongodb-driver-sync:4.9.1")
-    implementation("net.dv8tion:JDA:5.0.0-beta.22") {
-        exclude("opus-java")
-    }
+    implementation("net.dv8tion:JDA:5.0.0")
     implementation("org.jetbrains:annotations:24.0.1")
     implementation("gg.flyte:neptune:3.1-SNAPSHOT")
     implementation("com.google.code.gson:gson:2.8.9")
