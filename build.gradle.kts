@@ -22,6 +22,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.github.mlgpenguin:MathEvaluator:2.1.1")
     implementation("io.github.cdimascio:dotenv-java:2.3.2")
+    implementation("ch.qos.logback:logback-classic:1.5.6")
 }
 
 application {
