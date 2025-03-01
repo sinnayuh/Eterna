@@ -1,4 +1,4 @@
-package codes.sinister.eterna.database;
+package codes.sinister.eterna.util.database;
 
 import java.util.Optional;
 
@@ -13,12 +13,11 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.lang.Nullable;
 
-import codes.sinister.eterna.config.Config;
+import codes.sinister.eterna.util.config.Config;
 
 public enum Mongo {
     GUILDS,      // Stores guild-specific configuration
     USERS,       // Stores user profiles and data
-    STATISTICS,  // Stores usage statistics
     ;
 
     private static @Nullable MongoClient client;

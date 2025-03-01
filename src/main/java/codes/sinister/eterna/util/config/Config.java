@@ -1,4 +1,4 @@
-package codes.sinister.eterna.config;
+package codes.sinister.eterna.util.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.jetbrains.annotations.NotNull;

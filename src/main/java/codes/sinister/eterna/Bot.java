@@ -1,7 +1,7 @@
 package codes.sinister.eterna;
 
-import codes.sinister.eterna.config.Config;
-import codes.sinister.eterna.database.Mongo;
+import codes.sinister.eterna.util.config.Config;
+import codes.sinister.eterna.util.database.Mongo;
 import gg.flyte.neptune.Neptune;
 import gg.flyte.neptune.annotation.Instantiate;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -93,7 +93,7 @@ public final class Bot {
                 }
                 
                 Neptune.Builder neptuneBuilder = new Neptune.Builder(shardManager.getShards().get(0), this)
-                        .clearCommands(true)
+                        .clearCommands(false)
                         .registerAllListeners(true);
                 
                 if (!devGuilds.isEmpty()) {

@@ -1,4 +1,4 @@
-package codes.sinister.eterna.database;
+package codes.sinister.eterna.util.database;
 
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
