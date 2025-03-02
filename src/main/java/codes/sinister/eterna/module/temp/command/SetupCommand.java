@@ -14,7 +14,7 @@ public class SetupCommand {
     @Command(
             name = "tempchannel",
             description = "Setup temporary voice channels",
-            permissions = {Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER}
+            permissions = {Permission.ADMINISTRATOR}
     )
     public void onSetup(
             SlashCommandInteractionEvent event,
@@ -56,7 +56,7 @@ public class SetupCommand {
     @Command(
             name = "tempchannel-status",
             description = "Check temporary voice channel configuration",
-            permissions = {Permission.MANAGE_CHANNEL}
+            permissions = {Permission.ADMINISTRATOR}
     )
     public void onStatus(SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();
@@ -90,7 +90,7 @@ public class SetupCommand {
     @Command(
             name = "tempchannel-reset",
             description = "Reset temporary voice channel configuration",
-            permissions = {Permission.MANAGE_CHANNEL, Permission.MANAGE_SERVER}
+            permissions = {Permission.ADMINISTRATOR}
     )
     public void onReset(SlashCommandInteractionEvent event) {
         Guild guild = event.getGuild();

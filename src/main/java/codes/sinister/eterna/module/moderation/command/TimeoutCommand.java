@@ -9,97 +9,93 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 public final class TimeoutCommand {
 
-    @Command(name = "timeout", description = "Timeout (mute) a user", permissions = Permission.MODERATE_MEMBERS)
+    @Command(name = "timeout", description = "Timeout a user", permissions = Permission.MODERATE_MEMBERS)
     public void onTimeout(@NotNull SlashCommandInteractionEvent event,
-                        @Option(description = "The user to timeout") @NotNull User user,
-                        @Option(description = "Duration in minutes") long durationMinutes,
-                        @Option(description = "Reason for the timeout", required = false) String reason) {
-
-        if (user.isBot()) {
-            event.reply("You can't timeout a bot!").setEphemeral(true).queue();
-            return;
-        }
-
-        if (durationMinutes <= 0 || durationMinutes > 40320) { // Max 28 days per Discord's limit
+                         @Option(description = "The user to timeout") @NotNull User user,
+                         @Option(description = "Minutes to timeout for") int minutes,
+                         @Option(description = "Reason for the timeout", required = false) String reason) {
+        
+        String finalReason = (reason != null) ? reason : "No reason provided";
+        
+        // Simple validation 
+        if (minutes <= 0 || minutes > 40320) { // 28 days max
             event.reply("Timeout duration must be between 1 minute and 28 days!").setEphemeral(true).queue();
             return;
         }
-
-        event.getGuild().retrieveMember(user).queue(
-            member -> {
-                if (!event.getGuild().getSelfMember().canInteract(member)) {
-                    event.reply("I can't timeout this user due to role hierarchy!").setEphemeral(true).queue();
-                    return;
-                }
-
-                if (!event.getMember().canInteract(member)) {
-                    event.reply("You can't timeout someone with a higher role than you!").setEphemeral(true).queue();
-                    return;
-                }
-
-                String timeoutReason = reason == null ? "No reason provided" : reason;
-                Duration timeoutDuration = Duration.of(durationMinutes, ChronoUnit.MINUTES);
-
-                member.timeoutFor(timeoutDuration)
-                    .reason(timeoutReason)
-                    .queue(
-                        success -> {
-                            ModLogService.logAction(
-                                event.getGuild(),
-                                event.getUser(),
-                                user,
-                                ModLogService.ModAction.MUTE,
-                                timeoutReason + " (Duration: " + durationMinutes + " minutes)"
-                            );
-                            event.reply("Successfully timed out " + user.getAsMention() + " for " + durationMinutes + " minutes.").setEphemeral(true).queue();
-                        },
-                        failure -> event.reply("Failed to timeout " + user.getAsMention()).setEphemeral(true).queue()
+        
+        if (user.isBot()) {
+            event.reply("You cannot timeout a bot.").setEphemeral(true).queue();
+            return;
+        }
+        
+        // Use guild.timeoutFor(userId) instead of retrieving the member first
+        event.getGuild().timeoutFor(user, Duration.ofMinutes(minutes))
+            .reason(finalReason)
+            .queue(
+                success -> {
+                    // Log the action
+                    ModLogService.logAction(
+                        event.getGuild(),
+                        event.getUser(),
+                        user,
+                        ModLogService.ModAction.MUTE,
+                        finalReason + " (Duration: " + minutes + " minutes)"
                     );
-            },
-            error -> event.reply("Error: The user is not in this server.").setEphemeral(true).queue()
-        );
+                    
+                    // Send confirmation
+                    event.reply("✅ " + user.getAsMention() + " has been timed out for " + minutes + " minutes.").setEphemeral(true).queue();
+                },
+                error -> {
+                    if (error.getMessage().contains("Unknown User") || error.getMessage().contains("Unknown Member")) {
+                        event.reply("❌ This user is not in the server.").setEphemeral(true).queue();
+                    } else if (error.getMessage().contains("hierarchy")) {
+                        event.reply("❌ I cannot timeout this user due to role hierarchy.").setEphemeral(true).queue();
+                    } else {
+                        event.reply("❌ Failed to timeout user: " + error.getMessage()).setEphemeral(true).queue();
+                    }
+                }
+            );
     }
-
-    @Command(name = "untimeout", description = "Remove a timeout from a user", permissions = Permission.MODERATE_MEMBERS)
-    public void onRemoveTimeout(@NotNull SlashCommandInteractionEvent event,
-                                @Option(description = "The user to remove timeout from") @NotNull User user,
-                                @Option(description = "Reason for removing timeout", required = false) String reason) {
-
-        event.getGuild().retrieveMember(user).queue(
-            member -> {
-                if (!event.getGuild().getSelfMember().canInteract(member)) {
-                    event.reply("I can't remove the timeout from this user due to role hierarchy!").setEphemeral(true).queue();
-                    return;
-                }
-
-                if (!event.getMember().canInteract(member)) {
-                    event.reply("You can't remove a timeout from someone with a higher role than you!").setEphemeral(true).queue();
-                    return;
-                }
-
-                String untimeoutReason = reason == null ? "No reason provided" : reason;
-
-                member.removeTimeout()
-                    .reason(untimeoutReason)
-                    .queue(
-                        success -> {
-                            ModLogService.logAction(
-                                event.getGuild(),
-                                event.getUser(),
-                                user,
-                                ModLogService.ModAction.UNMUTE,
-                                untimeoutReason
-                            );
-                            event.reply("Successfully removed timeout from " + user.getAsMention()).setEphemeral(true).queue();
-                        },
-                        failure -> event.reply("Failed to remove timeout from " + user.getAsMention()).setEphemeral(true).queue()
+    
+    @Command(name = "untimeout", description = "Remove timeout from a user", permissions = Permission.MODERATE_MEMBERS)
+    public void onUntimeout(@NotNull SlashCommandInteractionEvent event,
+                           @Option(description = "The user to remove timeout from") @NotNull User user,
+                           @Option(description = "Reason for removing timeout", required = false) String reason) {
+        
+        String finalReason = (reason != null) ? reason : "No reason provided";
+        
+        if (user.isBot()) {
+            event.reply("Bots cannot be timed out.").setEphemeral(true).queue();
+            return;
+        }
+        
+        // Use guild.removeTimeout(userId) instead of retrieving member first
+        event.getGuild().removeTimeout(user)
+            .reason(finalReason)
+            .queue(
+                success -> {
+                    // Log the action
+                    ModLogService.logAction(
+                        event.getGuild(),
+                        event.getUser(),
+                        user,
+                        ModLogService.ModAction.UNMUTE,
+                        finalReason
                     );
-            },
-            error -> event.reply("Error: The user is not in this server.").setEphemeral(true).queue()
-        );
+                    
+                    // Send confirmation
+                    event.reply("✅ Timeout removed from " + user.getAsMention()).setEphemeral(true).queue();
+                },
+                error -> {
+                    if (error.getMessage().contains("Unknown User") || error.getMessage().contains("Unknown Member")) {
+                        event.reply("❌ This user is not in the server.").setEphemeral(true).queue();
+                    } else {
+                        event.reply("❌ Failed to remove timeout: " + error.getMessage()).setEphemeral(true).queue();
+                    }
+                }
+            );
     }
 }

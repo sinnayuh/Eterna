@@ -6,51 +6,52 @@ import gg.flyte.neptune.annotation.Option;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+
 import org.jetbrains.annotations.NotNull;
 
 public final class KickCommand {
 
     @Command(name = "kick", description = "Kick a user from the server", permissions = Permission.KICK_MEMBERS)
     public void onKick(@NotNull SlashCommandInteractionEvent event,
-                      @Option(description = "The user you wish to kick") @NotNull User user,
-                      @Option(description = "Reason for the kick if applicable", required = false) String reason) {
-
+                      @Option(description = "The user to kick") @NotNull User user,
+                      @Option(description = "Reason for the kick", required = false) String reason) {
+        
+        String finalReason = (reason != null) ? reason : "No reason provided";
+        
         if (user.isBot()) {
-            event.reply("You can't kick a bot!").setEphemeral(true).queue();
+            event.reply("You cannot kick a bot.").setEphemeral(true).queue();
             return;
         }
         
-        event.getGuild().retrieveMember(user).queue(
-            member -> {
-                if (!event.getGuild().getSelfMember().canInteract(member)) {
-                    event.reply("I can't kick this user due to role hierarchy!").setEphemeral(true).queue();
-                    return;
-                }
-
-                if (!event.getMember().canInteract(member)) {
-                    event.reply("You can't kick someone with a higher role than you!").setEphemeral(true).queue();
-                    return;
-                }
-
-                String kickReason = reason == null ? "No reason provided" : reason;
+        if (user.getId().equals(event.getUser().getId())) {
+            event.reply("You cannot kick yourself.").setEphemeral(true).queue();
+            return;
+        }
+        
+        // Kick the user directly from the guild
+        event.getGuild().kick(user).reason(finalReason).queue(
+            success -> {
+                // Log action first
+                ModLogService.logAction(
+                    event.getGuild(),
+                    event.getUser(),
+                    user,
+                    ModLogService.ModAction.KICK,
+                    finalReason
+                );
                 
-                event.getGuild().kick(member)
-                    .reason(kickReason)
-                    .queue(
-                        success -> {
-                            ModLogService.logAction(
-                                event.getGuild(),
-                                event.getUser(),
-                                user,
-                                ModLogService.ModAction.KICK,
-                                kickReason
-                            );
-                            event.reply("Successfully kicked " + user.getAsMention()).setEphemeral(true).queue();
-                        },
-                        failure -> event.reply("Failed to kick " + user.getAsMention()).setEphemeral(true).queue()
-                    );
+                // Send confirmation
+                event.reply("✅ " + user.getAsMention() + " has been kicked.").setEphemeral(true).queue();
             },
-            error -> event.reply("Error: The user is not in this server.").setEphemeral(true).queue()
+            error -> {
+                if (error.getMessage().contains("Unknown User") || error.getMessage().contains("Unknown Member")) {
+                    event.reply("❌ This user is not in the server.").setEphemeral(true).queue();
+                } else if (error.getMessage().contains("hierarchy")) {
+                    event.reply("❌ I cannot kick this user due to role hierarchy.").setEphemeral(true).queue();
+                } else {
+                    event.reply("❌ Failed to kick user: " + error.getMessage()).setEphemeral(true).queue();
+                }
+            }
         );
     }
 }
